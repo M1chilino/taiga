@@ -9,12 +9,18 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const root = document.documentElement;
 const reduced = root.classList.contains('reduced');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+// ?no3d desliga todo o 3D (útil para diagnosticar desempenho)
+const no3d = new URLSearchParams(location.search).has('no3d');
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string, ctx: ParentNode = document) =>
   ctx.querySelector<T>(sel);
 const $$ = <T extends HTMLElement = HTMLElement>(sel: string, ctx: ParentNode = document) =>
   Array.from(ctx.querySelectorAll<T>(sel));
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+/** Executa quando o navegador está ocioso (com limite de espera). */
+const idle = (fn: () => void, timeout = 600) =>
+  'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout }) : setTimeout(fn, 50);
 
 /* ------------------------------------------------------------------ */
 /* Links de âncora (rolagem nativa: fica no thread do compositor e não */
@@ -104,36 +110,8 @@ function initHeroAmbient() {
   const hero = $('[data-hero]');
   if (!hero || reduced) return;
 
-  const drifts = $$('[data-glow]').map((el, i) =>
-    gsap.to(el, {
-      x: i ? 60 : -70,
-      y: i ? -50 : 60,
-      duration: 9 + i * 3,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    }),
-  );
-
-  // Fora da tela, pausa as animações do hero (CSS e GSAP)
-  new IntersectionObserver(([en]) => {
-    hero.classList.toggle('is-paused', !en.isIntersecting);
-    drifts.forEach((t) => (en.isIntersecting ? t.resume() : t.pause()));
-  }).observe(hero);
-
-  // Mouse: só o spot de luz (a logo 3D não segue o mouse)
-  if (finePointer) {
-    // o spot de luz é um elemento que só se move por transform (não repinta o hero inteiro)
-    const spot = $('[data-spot]');
-    if (spot) gsap.set(spot, { x: hero.clientWidth * 0.72, y: hero.clientHeight * 0.4 });
-    const qx = spot ? gsap.quickTo(spot, 'x', { duration: 0.9, ease: 'power3.out' }) : null;
-    const qy = spot ? gsap.quickTo(spot, 'y', { duration: 0.9, ease: 'power3.out' }) : null;
-    hero.addEventListener('pointermove', (e) => {
-      const r = hero.getBoundingClientRect();
-      qx?.(e.clientX - r.left);
-      qy?.(e.clientY - r.top);
-    });
-  }
+  // Fora da tela, pausa as animações CSS do hero
+  new IntersectionObserver(([en]) => hero.classList.toggle('is-paused', !en.isIntersecting)).observe(hero);
 
   // Rolagem: texto sobe mais rápido e o símbolo 3D gira/sobe (via heroState.scroll)
   ScrollTrigger.create({
@@ -153,7 +131,7 @@ function initHeroAmbient() {
 function initHero3DScene() {
   const stage = $('[data-hero-stage]');
   const canvas = $<HTMLCanvasElement>('[data-hero-canvas]');
-  if (!stage || !canvas) return;
+  if (!stage || !canvas || no3d) return;
   if (reduced) heroState.intro = 1;
 
   const start = () =>
@@ -172,8 +150,8 @@ function initHero3DScene() {
       })
       .catch(() => {});
 
-  if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1500 });
-  else setTimeout(start, 300);
+  // espera a animação de entrada terminar para não competir com ela
+  setTimeout(() => idle(start, 1500), reduced ? 300 : 2300);
 }
 
 /* ------------------------------------------------------------------ */
@@ -182,7 +160,7 @@ function initHero3DScene() {
 function initServiceIcons3D() {
   const hosts = $$('[data-service-icon]');
   const section = $('[data-services]');
-  if (!hosts.length || !section) return;
+  if (!hosts.length || !section || no3d) return;
 
   const load = () =>
     import('./icons3d')
@@ -574,25 +552,42 @@ function initFloat() {
 }
 
 function boot() {
+  // só o essencial da primeira tela roda de imediato
   initScroll();
   initHeader();
   initHeroIntro();
   initHeroAmbient();
   initHero3DScene();
-  initServiceIcons3D();
-  initReel();
-  initStats();
-  initSections();
-  initFeedback();
-  initScrubText();
-  initProblem();
-  initCta();
-  initMagnetic();
-  initTilt();
-  initFloat();
-  // Fontes e imagens mudam a altura da página: recalcula os gatilhos
-  document.fonts?.ready.then(() => ScrollTrigger.refresh());
-  addEventListener('load', () => ScrollTrigger.refresh());
+
+  // o resto (seções abaixo da dobra) é montado em fatias, quando o navegador está ocioso,
+  // para não criar uma travada única logo na entrada
+  const later = [
+    initReel,
+    initStats,
+    initSections,
+    initScrubText,
+    initProblem,
+    initFeedback,
+    initCta,
+    initMagnetic,
+    initTilt,
+    initFloat,
+    initServiceIcons3D,
+  ];
+  const next = () => {
+    const task = later.shift();
+    if (!task) {
+      // uma única recalculada no fim, depois de fontes e imagens
+      document.fonts?.ready.then(() => ScrollTrigger.refresh());
+      return;
+    }
+    idle(() => {
+      task();
+      next();
+    });
+  };
+  if (document.readyState === 'complete') next();
+  else addEventListener('load', next, { once: true });
 }
 
 boot();

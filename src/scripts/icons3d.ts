@@ -21,7 +21,7 @@ import {
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { gsap } from 'gsap';
-import { isWeakGPU } from './gpu';
+import { breathe, isWeakGPU } from './gpu';
 
 export type IconKind = 'search' | 'chart' | 'play';
 
@@ -189,6 +189,7 @@ export function initServiceIcons(slots: IconSlot[], animate: boolean) {
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
     renderer.setClearColor(0x000000, 0);
+    await breathe();
 
     const scene = new Scene();
     scene.environment = new PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04, 0.1, 100, { size: 128 }).texture;
@@ -206,6 +207,7 @@ export function initServiceIcons(slots: IconSlot[], animate: boolean) {
     const icon = builders[slot.kind]();
     icon.scale.setScalar(0.001);
     scene.add(icon);
+    await breathe();
     const orb = icon.getObjectByName('orb');
 
     const resize = () => {

@@ -1,5 +1,8 @@
 import type { WebGLRenderer } from 'three';
 
+/** Devolve o controle ao navegador por um quadro: quebra tarefas longas em pedaços menores. */
+export const breathe = () => new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+
 /**
  * Detecta placas de vídeo fracas ou renderização por software (SwiftShader, llvmpipe...).
  * Nelas o 3D trava a página, então o site mantém a versão estática.

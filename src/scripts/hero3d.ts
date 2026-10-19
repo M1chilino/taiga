@@ -25,7 +25,7 @@ import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import markSvg from '../assets/logos/icone-verde.svg?raw';
 import { gsap } from 'gsap';
-import { isWeakGPU } from './gpu';
+import { breathe, isWeakGPU } from './gpu';
 
 /** Estado compartilhado com motion.ts (rolagem e entrada). */
 export interface HeroState {
@@ -67,10 +67,12 @@ export async function initHero3D({ host, canvas, state, animate, onGiveUp }: Opt
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.setClearColor(0x000000, 0);
+  await breathe();
 
   const scene = new Scene();
   const pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04, 0.1, 100, { size: 128 }).texture;
+  await breathe();
 
   const camera = new PerspectiveCamera(FOV, 1, 0.1, 60);
 
@@ -117,6 +119,7 @@ export async function initHero3D({ host, canvas, state, animate, onGiveUp }: Opt
   const markScale = 4.3 / 1000;
   parts.scale.set(markScale, -markScale, markScale);
   scene.add(mark);
+  await breathe();
 
   /* ------------------- Folhas caindo (instanciadas) ----------------- */
   const leafCount = small ? 12 : 24;
@@ -216,6 +219,7 @@ export async function initHero3D({ host, canvas, state, animate, onGiveUp }: Opt
     renderer.render(scene, camera);
   }
 
+  await breathe();
   // compila os shaders em paralelo, sem travar a página
   await renderer.compileAsync(scene, camera).catch(() => {});
 
