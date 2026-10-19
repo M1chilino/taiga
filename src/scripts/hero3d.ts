@@ -27,10 +27,8 @@ import markSvg from '../assets/logos/icone-verde.svg?raw';
 import { gsap } from 'gsap';
 import { isWeakGPU } from './gpu';
 
-/** Estado compartilhado com motion.ts (mouse, rolagem e entrada). */
+/** Estado compartilhado com motion.ts (rolagem e entrada). */
 export interface HeroState {
-  px: number; // -1..1
-  py: number; // -1..1
   scroll: number; // 0..1 (progresso do hero saindo da tela)
   intro: number; // 0..1
 }
@@ -40,16 +38,18 @@ interface Options {
   canvas: HTMLCanvasElement;
   state: HeroState;
   animate: boolean;
+  /** Chamado se a máquina não der conta: o site volta para a logo estática. */
+  onGiveUp?: () => void;
 }
 
 const GREENS = ['#00543F', '#0a7a5a', '#0d6b4d', '#3e8d6b', '#8cbf9b'];
 const FOV = 30;
 
 /** Cena 3D do hero: símbolo da Taiga em relevo e folhas de árvore caindo. */
-export async function initHero3D({ host, canvas, state, animate }: Options) {
+export async function initHero3D({ host, canvas, state, animate, onGiveUp }: Options) {
   let renderer: WebGLRenderer;
   try {
-    renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   } catch {
     return null;
   }
@@ -60,7 +60,9 @@ export async function initHero3D({ host, canvas, state, animate }: Options) {
   }
 
   const small = matchMedia('(max-width: 899px)').matches;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, small ? 1.5 : 2));
+  // resolução moderada: o custo da GPU cresce com o quadrado do pixel ratio
+  let ratio = Math.min(devicePixelRatio, small ? 1.25 : 1.5);
+  renderer.setPixelRatio(ratio);
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
@@ -80,9 +82,8 @@ export async function initHero3D({ host, canvas, state, animate }: Options) {
   const rim = new DirectionalLight(0xa9cdb1, 1.8);
   rim.position.set(-6, 2, -5);
   scene.add(rim);
-  const orbitA = new PointLight(0xffffff, 42, 22, 2);
-  const orbitB = new PointLight(0x5fd0a0, 30, 22, 2);
-  scene.add(orbitA, orbitB);
+  const orbit = new PointLight(0xffffff, 48, 22, 2);
+  scene.add(orbit);
 
   /* ------------------- Símbolo da Taiga em 3D ---------------------- */
   const mark = new Group();
@@ -118,7 +119,7 @@ export async function initHero3D({ host, canvas, state, animate }: Options) {
   scene.add(mark);
 
   /* ------------------- Folhas caindo (instanciadas) ----------------- */
-  const leafCount = small ? 16 : 32;
+  const leafCount = small ? 12 : 24;
   const leafShape = new Shape();
   leafShape.moveTo(0, -0.9);
   leafShape.bezierCurveTo(0.78, -0.4, 0.72, 0.55, 0, 1.15);
@@ -165,26 +166,22 @@ export async function initHero3D({ host, canvas, state, animate }: Options) {
     const visibleH = Math.max(5.2, needW / camera.aspect);
     camera.position.set(0, 0, visibleH / (2 * Math.tan(MathUtils.degToRad(FOV / 2))));
     camera.updateProjectionMatrix();
-    if (!animate) frame(0, 0);
+    if (!animate) frame(0);
   };
 
   /* ---------------------------- Animação --------------------------- */
   const dummy = new Object3D();
-  let sx = 0;
-  let sy = 0;
   let visible = true;
   let time = 0;
 
-  function frame(t: number, dt: number) {
+  function frame(t: number) {
     const intro = MathUtils.clamp(state.intro, 0, 1);
     const ease = 1 - Math.pow(1 - intro, 3);
 
-    sx += (state.px - sx) * Math.min(dt * 4, 1);
-    sy += (state.py - sy) * Math.min(dt * 4, 1);
     const sc = state.scroll;
 
-    mark.rotation.y = 0.3 + Math.sin(t * 0.5) * 0.3 + sx * 0.55 + sc * 1.3 - (1 - ease) * Math.PI * 1.2;
-    mark.rotation.x = -0.08 - sy * 0.32 + Math.sin(t * 0.42) * 0.07 + sc * 0.25;
+    mark.rotation.y = 0.3 + Math.sin(t * 0.5) * 0.3 + sc * 1.3 - (1 - ease) * Math.PI * 1.2;
+    mark.rotation.x = -0.08 + Math.sin(t * 0.42) * 0.07 + sc * 0.25;
     mark.position.y = Math.sin(t * 0.8) * 0.14 + sc * 1.1;
     const s = 0.65 + ease * 0.35;
     mark.scale.setScalar(s);
@@ -195,13 +192,10 @@ export async function initHero3D({ host, canvas, state, animate }: Options) {
       m.position.y = Math.cos(t * 0.7 + i) * 14;
     });
 
-    // luzes
-    key.position.set(4 + sx * 3, 5 - sy * 2, 7);
-    orbitA.position.set(Math.cos(t * 0.7) * 5.2, Math.sin(t * 0.5) * 3 + 1, 3.5 + Math.sin(t * 0.9) * 1.5);
-    orbitB.position.set(Math.cos(t * 0.6 + 3) * 5.5, Math.sin(t * 0.45 + 2) * 3, 3 + Math.cos(t * 0.8) * 1.5);
+    // luz que passeia pelo símbolo
+    orbit.position.set(Math.cos(t * 0.7) * 5.2, Math.sin(t * 0.5) * 3 + 1, 3.5 + Math.sin(t * 0.9) * 1.5);
 
     // folhas: caem balançando e girando
-    forest.position.x = sx * -0.5;
     forest.position.y = sc * 1.8;
     leafData.forEach((d, i) => {
       const cycle = (((t * d.fall + d.offset) % FALL) + FALL) % FALL;
@@ -230,12 +224,35 @@ export async function initHero3D({ host, canvas, state, animate }: Options) {
 
   if (animate) {
     new IntersectionObserver(([en]) => (visible = en.isIntersecting), { threshold: 0 }).observe(host);
-    gsap.ticker.add((_, deltaMs) => {
+
+    // Controle de qualidade: se a taxa de quadros ficar baixa, reduz a resolução do 3D
+    // aos poucos e, em último caso, desiste e volta para a logo estática.
+    let frames = 0;
+    let acc = 0;
+    const tick = (_: number, deltaMs: number) => {
       if (!visible || document.hidden) return;
       const dt = Math.min(deltaMs, 64) / 1000;
       time += dt;
-      frame(time, dt);
-    });
+      frame(time);
+
+      if (++frames <= 40) return; // ignora o aquecimento (shaders, entrada)
+      acc += deltaMs;
+      if (frames < 40 + 45) return;
+      const avg = acc / 45;
+      frames = 40;
+      acc = 0;
+      if (avg <= 27) return; // mais de ~37 fps: tudo certo
+      if (ratio > 0.9) {
+        ratio = Math.max(0.85, ratio - 0.3);
+        renderer.setPixelRatio(ratio);
+        resize();
+      } else {
+        gsap.ticker.remove(tick);
+        renderer.dispose();
+        onGiveUp?.();
+      }
+    };
+    gsap.ticker.add(tick);
   }
 
   return { renderer };

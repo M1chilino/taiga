@@ -12,14 +12,14 @@ const { work, index } = Astro.props;
 
 // Variações dos cards de exemplo (tons de verde, posição da marca, tipo de peça)
 const variants = [
-  { bg: 'linear-gradient(160deg,#0a6b50,#00382a)', label: 'Reels', video: true, mark: '78% 24% / 150%' },
-  { bg: 'linear-gradient(200deg,#d7e8da,#a9cdb1)', label: 'Post', video: false, mark: '22% 70% / 120%', dark: true },
-  { bg: 'linear-gradient(140deg,#00543f,#1f7a5c)', label: 'Reels', video: true, mark: '30% 40% / 170%' },
-  { bg: 'linear-gradient(180deg,#f3f7f2,#cfe0d3)', label: 'Carrossel', video: false, mark: '85% 82% / 110%', dark: true },
-  { bg: 'linear-gradient(210deg,#003a2c,#0b6a4f)', label: 'Reels', video: true, mark: '60% 65% / 160%' },
-  { bg: 'linear-gradient(150deg,#8cbf9b,#3e8d6b)', label: 'Identidade', video: false, mark: '20% 25% / 130%' },
-  { bg: 'linear-gradient(170deg,#0f2a22,#00543f)', label: 'Reels', video: true, mark: '75% 40% / 140%' },
-  { bg: 'linear-gradient(190deg,#e6efe8,#b8d6bf)', label: 'Post', video: false, mark: '35% 80% / 115%', dark: true },
+  { bg: 'linear-gradient(160deg,#0a6b50,#00382a)', label: 'Reels', video: true },
+  { bg: 'linear-gradient(200deg,#d7e8da,#a9cdb1)', label: 'Post', video: false, dark: true },
+  { bg: 'linear-gradient(140deg,#00543f,#1f7a5c)', label: 'Reels', video: true },
+  { bg: 'linear-gradient(180deg,#f3f7f2,#cfe0d3)', label: 'Carrossel', video: false, dark: true },
+  { bg: 'linear-gradient(210deg,#003a2c,#0b6a4f)', label: 'Reels', video: true },
+  { bg: 'linear-gradient(150deg,#8cbf9b,#3e8d6b)', label: 'Identidade', video: false },
+  { bg: 'linear-gradient(170deg,#0f2a22,#00543f)', label: 'Reels', video: true },
+  { bg: 'linear-gradient(190deg,#e6efe8,#b8d6bf)', label: 'Post', video: false, dark: true },
 ];
 const v = work.kind === 'placeholder' ? variants[work.variant % variants.length] : null;
 ---
@@ -54,7 +54,7 @@ const v = work.kind === 'placeholder' ? variants[work.variant % variants.length]
       }
       {
         v && (
-          <div class:list={['ph', { 'ph--dark': v.dark }]} style={`--ph-bg:${v.bg};--ph-mark:${v.mark}`}>
+          <div class:list={['ph', { 'ph--dark': v.dark }]} style={`--ph-bg:${v.bg}`}>
             <img class:list={['ph__mark', { 'ph__mark--ink': v.dark }]} src={(v.dark ? markGreen : markLight).src} alt="" width="200" height="130" draggable="false" />
           </div>
         )
@@ -78,7 +78,6 @@ const v = work.kind === 'placeholder' ? variants[work.variant % variants.length]
     flex: none;
     width: var(--card-w);
     margin-right: var(--card-gap);
-    will-change: transform;
   }
   .card__frame {
     position: relative;
@@ -97,7 +96,6 @@ const v = work.kind === 'placeholder' ? variants[work.variant % variants.length]
     height: 100%;
     /* margem para o parallax horizontal da mídia dentro do card */
     scale: 1.2;
-    will-change: transform;
   }
   .card__media :global(img),
   .card__media video {
@@ -142,7 +140,6 @@ const v = work.kind === 'placeholder' ? variants[work.variant % variants.length]
     border-radius: 999px;
     font: 600 0.8rem/1 var(--font-body);
     background: rgb(255 255 255 / 0.16);
-    backdrop-filter: blur(8px);
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
   }
   .ph__label--dark {

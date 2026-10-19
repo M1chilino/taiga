@@ -38,4 +38,3 @@ const placeholders: Work[] = Array.from({ length: 8 }, (_, i) => ({
 }));
 
 export const works: Work[] = real.length ? real.map((r) => r.work) : placeholders;
-export const usingPlaceholders = real.length === 0;

@@ -88,18 +88,20 @@ const words = [
       radial-gradient(40% 40% at 45% 0%, #ffffff, transparent 70%),
       linear-gradient(180deg, #f7faf6 0%, #e6efe8 100%);
   }
+  /* Luzes macias feitas só com gradiente radial: não usam filter/blur, que
+     seria recalculado a cada quadro pela placa de vídeo */
   .hero__aurora {
     position: absolute;
-    width: 46rem;
-    height: 46rem;
-    right: -12rem;
+    width: 52rem;
+    height: 52rem;
+    right: -14rem;
     top: 50%;
-    margin-top: -23rem;
+    margin-top: -26rem;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, #cfe0d3, #8cbf9b, #f3f7f2, #5fa583, #cfe0d3);
-    filter: blur(70px);
-    opacity: 0.7;
-    animation: hero-spin 46s linear infinite;
+    background:
+      radial-gradient(closest-side at 40% 45%, rgb(140 191 155 / 0.7), transparent 75%),
+      radial-gradient(closest-side at 65% 60%, rgb(95 165 131 / 0.45), transparent 70%);
+    animation: hero-drift 22s ease-in-out infinite alternate;
     will-change: transform;
   }
   .hero__beam {
@@ -107,8 +109,9 @@ const words = [
     top: -15%;
     width: 11rem;
     height: 130%;
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0) 85%);
-    filter: blur(16px);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.9) 50%, transparent);
+    mask-image: linear-gradient(180deg, #000, transparent 85%);
+    -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
     transform-origin: top center;
     animation: hero-sway 9s ease-in-out infinite alternate;
   }
@@ -128,22 +131,21 @@ const words = [
   .hero__glow {
     position: absolute;
     border-radius: 50%;
-    filter: blur(60px);
     will-change: transform;
   }
   .hero__glow--a {
-    width: 26rem;
-    height: 26rem;
-    right: 6%;
-    bottom: -8rem;
-    background: rgb(0 84 63 / 0.18);
+    width: 34rem;
+    height: 34rem;
+    right: 0;
+    bottom: -12rem;
+    background: radial-gradient(closest-side, rgb(0 84 63 / 0.2), transparent);
   }
   .hero__glow--b {
-    width: 20rem;
-    height: 20rem;
-    left: -6rem;
-    top: 18%;
-    background: rgb(169 205 177 / 0.6);
+    width: 28rem;
+    height: 28rem;
+    left: -10rem;
+    top: 12%;
+    background: radial-gradient(closest-side, rgb(169 205 177 / 0.65), transparent);
   }
   .hero__dots {
     opacity: 0.55;
@@ -202,9 +204,9 @@ const words = [
     will-change: transform;
   }
 
-  @keyframes hero-spin {
+  @keyframes hero-drift {
     to {
-      transform: rotate(360deg);
+      transform: translate3d(-4rem, 3rem, 0) scale(1.08);
     }
   }
   @keyframes hero-sway {
@@ -296,7 +298,6 @@ const words = [
     translate: -50% 0;
     border-radius: 50%;
     background: radial-gradient(closest-side, rgb(0 58 44 / 0.35), transparent);
-    filter: blur(8px);
     animation: hero-floor 5s ease-in-out infinite;
   }
   @keyframes hero-floor {
@@ -349,6 +350,9 @@ const words = [
     to {
       visibility: visible;
     }
+  }
+  .hero.is-paused :is(.hero__aurora, .hero__beam, .hero__floor, .word) {
+    animation-play-state: paused;
   }
   @media (prefers-reduced-motion: reduce) {
     .hero__aurora,

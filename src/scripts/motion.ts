@@ -1,7 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import Lenis from 'lenis';
 import type { HeroState } from './hero3d';
 import type { IconKind } from './icons3d';
 
@@ -17,28 +16,20 @@ const $$ = <T extends HTMLElement = HTMLElement>(sel: string, ctx: ParentNode = 
   Array.from(ctx.querySelectorAll<T>(sel));
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-let lenis: Lenis | null = null;
-
 /* ------------------------------------------------------------------ */
-/* Rolagem suave + links de âncora                                     */
+/* Links de âncora (rolagem nativa: fica no thread do compositor e não */
+/* trava quando a página está ocupada)                                 */
 /* ------------------------------------------------------------------ */
 function initScroll() {
-  if (!reduced) {
-    lenis = new Lenis({ lerp: 0.1 });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((t) => lenis?.raf(t * 1000));
-    gsap.ticker.lagSmoothing(0);
-  }
-
   $$<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
     a.addEventListener('click', (e) => {
       const id = a.getAttribute('href')!.slice(1);
-      const target = id === 'inicio' ? document.body : document.getElementById(id);
-      if (!target) return;
+      const target = id === 'inicio' ? null : document.getElementById(id);
+      if (id !== 'inicio' && !target) return;
       e.preventDefault();
-      const offset = id === 'inicio' ? 0 : -16;
-      if (lenis) lenis.scrollTo(target, { offset, duration: 1.4 });
-      else target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+      const behavior = reduced ? 'auto' : 'smooth';
+      if (target) target.scrollIntoView({ behavior });
+      else scrollTo({ top: 0, behavior });
       history.replaceState(null, '', id === 'inicio' ? location.pathname : `#${id}`);
     });
   });
@@ -68,7 +59,7 @@ function initHeader() {
 /* ------------------------------------------------------------------ */
 /* Hero: entrada orquestrada + movimento constante + parallax          */
 /* ------------------------------------------------------------------ */
-const heroState: HeroState = { px: 0, py: 0, scroll: 0, intro: 0 };
+const heroState: HeroState = { scroll: 0, intro: 0 };
 
 function initHeroIntro() {
   const title = $('[data-hero-title]');
@@ -113,7 +104,7 @@ function initHeroAmbient() {
   const hero = $('[data-hero]');
   if (!hero || reduced) return;
 
-  $$('[data-glow]').forEach((el, i) => {
+  const drifts = $$('[data-glow]').map((el, i) =>
     gsap.to(el, {
       x: i ? 60 : -70,
       y: i ? -50 : 60,
@@ -121,10 +112,16 @@ function initHeroAmbient() {
       ease: 'sine.inOut',
       yoyo: true,
       repeat: -1,
-    });
-  });
+    }),
+  );
 
-  // Mouse: spot de luz e símbolo 3D
+  // Fora da tela, pausa as animações do hero (CSS e GSAP)
+  new IntersectionObserver(([en]) => {
+    hero.classList.toggle('is-paused', !en.isIntersecting);
+    drifts.forEach((t) => (en.isIntersecting ? t.resume() : t.pause()));
+  }).observe(hero);
+
+  // Mouse: só o spot de luz (a logo 3D não segue o mouse)
   if (finePointer) {
     // o spot de luz é um elemento que só se move por transform (não repinta o hero inteiro)
     const spot = $('[data-spot]');
@@ -133,16 +130,8 @@ function initHeroAmbient() {
     const qy = spot ? gsap.quickTo(spot, 'y', { duration: 0.9, ease: 'power3.out' }) : null;
     hero.addEventListener('pointermove', (e) => {
       const r = hero.getBoundingClientRect();
-      const nx = (e.clientX - r.left) / r.width;
-      const ny = (e.clientY - r.top) / r.height;
       qx?.(e.clientX - r.left);
       qy?.(e.clientY - r.top);
-      heroState.px = (nx - 0.5) * 2;
-      heroState.py = (ny - 0.5) * 2;
-    });
-    hero.addEventListener('pointerleave', () => {
-      heroState.px = 0;
-      heroState.py = 0;
     });
   }
 
@@ -170,7 +159,13 @@ function initHero3DScene() {
   const start = () =>
     import('./hero3d')
       .then(async ({ initHero3D }) => {
-        const api = await initHero3D({ host: stage, canvas, state: heroState, animate: !reduced });
+        const api = await initHero3D({
+          host: stage,
+          canvas,
+          state: heroState,
+          animate: !reduced,
+          onGiveUp: () => stage.classList.remove('is-3d'),
+        });
         if (!api) return;
         requestAnimationFrame(() => stage.classList.add('is-3d'));
         if (!reduced) gsap.to(heroState, { intro: 1, duration: 2.8, ease: 'none', delay: 0.15 });
@@ -258,9 +253,7 @@ function initReel() {
 
   const state = { hover: 1, fling: 0, dragging: false };
   let boost = 0;
-  let skew = 0;
   let active = true;
-  let sectionProgress = 0.5;
 
   // Vídeos só tocam quando estão na tela
   const io = new IntersectionObserver(
@@ -317,13 +310,12 @@ function initReel() {
     trigger: section,
     start: 'top bottom',
     end: 'bottom top',
-    onUpdate: (self) => (sectionProgress = self.progress),
     onToggle: (self) => (active = self.isActive),
   });
 
   const base = () => (vw < 700 ? 52 : 70);
 
-  gsap.ticker.add((time, deltaMs) => {
+  gsap.ticker.add((_, deltaMs) => {
     if (!active) return;
     const dt = Math.min(deltaMs, 64) / 1000;
 
@@ -336,18 +328,13 @@ function initReel() {
     if (x <= -setW) x += setW;
     if (x > 0) x -= setW;
 
-    const skewTarget = clamp(scrollSt.getVelocity() / -450, -5, 5);
-    skew += (skewTarget - skew) * 0.1;
+    track.style.transform = `translate3d(${x.toFixed(1)}px,0,0)`;
 
-    track.style.transform = `translate3d(${x}px,0,0) skewX(${skew.toFixed(2)}deg)`;
-
+    // parallax da mídia dentro de cada card (só os que estão na tela)
     for (let i = 0; i < cards.length; i++) {
       const pos = padLeft + i * step + x;
       if (pos > vw + step || pos + cardW < -step) continue;
       const p = (pos + cardW / 2 - vw / 2) / (vw / 2 + cardW / 2);
-      const bob = Math.sin(time * 0.9 + i * 1.3) * 7;
-      const lift = ((i % 3) - 1) * (sectionProgress - 0.5) * 90;
-      cards[i].style.transform = `translate3d(0,${(bob + lift).toFixed(1)}px,0)`;
       const m = medias[i];
       if (m) m.style.transform = `translate3d(${(-p * cardW * 0.1).toFixed(1)}px,0,0)`;
     }
