@@ -1,16 +1,12 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import type { HeroState } from './hero3d';
-import type { IconKind } from './icons3d';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const root = document.documentElement;
 const reduced = root.classList.contains('reduced');
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
-// ?no3d desliga todo o 3D (útil para diagnosticar desempenho)
-const no3d = new URLSearchParams(location.search).has('no3d');
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string, ctx: ParentNode = document) =>
   ctx.querySelector<T>(sel);
@@ -65,8 +61,6 @@ function initHeader() {
 /* ------------------------------------------------------------------ */
 /* Hero: entrada orquestrada + movimento constante + parallax          */
 /* ------------------------------------------------------------------ */
-const heroState: HeroState = { scroll: 0, intro: 0 };
-
 function initHeroIntro() {
   const title = $('[data-hero-title]');
   if (!title) return;
@@ -113,79 +107,12 @@ function initHeroAmbient() {
   // Fora da tela, pausa as animações CSS do hero
   new IntersectionObserver(([en]) => hero.classList.toggle('is-paused', !en.isIntersecting)).observe(hero);
 
-  // Rolagem: texto sobe mais rápido e o símbolo 3D gira/sobe (via heroState.scroll)
-  ScrollTrigger.create({
-    trigger: hero,
-    start: 'top top',
-    end: 'bottom top',
-    onUpdate: (self) => (heroState.scroll = self.progress),
-  });
+  // Rolagem: o texto sobe um pouco mais rápido que a página
   gsap.to('[data-hero-content]', {
     y: -70,
     ease: 'none',
     scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
   });
-}
-
-/** Cena 3D (three.js), carregada sob demanda depois que a página ficou pronta. */
-function initHero3DScene() {
-  const stage = $('[data-hero-stage]');
-  const canvas = $<HTMLCanvasElement>('[data-hero-canvas]');
-  if (!stage || !canvas || no3d) return;
-  if (reduced) heroState.intro = 1;
-
-  const start = () =>
-    import('./hero3d')
-      .then(async ({ initHero3D }) => {
-        const api = await initHero3D({
-          host: stage,
-          canvas,
-          state: heroState,
-          animate: !reduced,
-          onGiveUp: () => stage.classList.remove('is-3d'),
-        });
-        if (!api) return;
-        requestAnimationFrame(() => stage.classList.add('is-3d'));
-        if (!reduced) gsap.to(heroState, { intro: 1, duration: 2.8, ease: 'none', delay: 0.15 });
-      })
-      .catch(() => {});
-
-  // espera a animação de entrada terminar para não competir com ela
-  setTimeout(() => idle(start, 1500), reduced ? 300 : 2300);
-}
-
-/* ------------------------------------------------------------------ */
-/* Ícones 3D dos serviços (carregados quando a seção está perto)       */
-/* ------------------------------------------------------------------ */
-function initServiceIcons3D() {
-  const hosts = $$('[data-service-icon]');
-  const section = $('[data-services]');
-  if (!hosts.length || !section || no3d) return;
-
-  const load = () =>
-    import('./icons3d')
-      .then(({ initServiceIcons }) =>
-        initServiceIcons(
-          hosts.map((host) => ({
-            host,
-            canvas: $<HTMLCanvasElement>('[data-service-canvas]', host)!,
-            hover: host.closest<HTMLElement>('[data-service]')!,
-            kind: host.dataset.icon as IconKind,
-          })),
-          !reduced,
-        ),
-      )
-      .catch(() => {});
-
-  const io = new IntersectionObserver(
-    ([en]) => {
-      if (!en.isIntersecting) return;
-      io.disconnect();
-      load();
-    },
-    { rootMargin: '700px 0px' },
-  );
-  io.observe(section);
 }
 
 /* ------------------------------------------------------------------ */
@@ -557,7 +484,6 @@ function boot() {
   initHeader();
   initHeroIntro();
   initHeroAmbient();
-  initHero3DScene();
 
   // o resto (seções abaixo da dobra) é montado em fatias, quando o navegador está ocioso,
   // para não criar uma travada única logo na entrada
@@ -572,7 +498,6 @@ function boot() {
     initMagnetic,
     initTilt,
     initFloat,
-    initServiceIcons3D,
   ];
   const next = () => {
     const task = later.shift();

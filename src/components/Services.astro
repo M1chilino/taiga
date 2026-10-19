@@ -1,5 +1,12 @@
 ---
+import { Image } from 'astro:assets';
 import { SERVICES } from '../data/services';
+import iconSearch from '../assets/3d/icone-analise.png';
+import iconChart from '../assets/3d/icone-gestao.png';
+import iconPlay from '../assets/3d/icone-videos.png';
+
+// Ícones 3D pré-renderizados (imagens estáticas)
+const icons = { search: iconSearch, chart: iconChart, play: iconPlay };
 ---
 
 <section class="services" id="servicos" data-services>
@@ -16,29 +23,8 @@ import { SERVICES } from '../data/services';
       {
         SERVICES.map((s) => (
           <li class="service" data-service>
-            <div class="service__icon" data-service-icon data-icon={s.icon} aria-hidden="true">
-              <canvas data-service-canvas />
-              <svg class="service__fallback" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                {s.icon === 'search' && (
-                  <>
-                    <circle cx="27" cy="27" r="15" />
-                    <path d="m38 38 15 15" />
-                  </>
-                )}
-                {s.icon === 'chart' && (
-                  <>
-                    <rect x="10" y="38" width="10" height="16" rx="3" />
-                    <rect x="27" y="26" width="10" height="28" rx="3" />
-                    <rect x="44" y="12" width="10" height="42" rx="3" />
-                  </>
-                )}
-                {s.icon === 'play' && (
-                  <>
-                    <rect x="8" y="14" width="48" height="36" rx="9" />
-                    <path d="M27 24v16l14-8Z" />
-                  </>
-                )}
-              </svg>
+            <div class="service__icon" aria-hidden="true">
+              <Image src={icons[s.icon]} alt="" widths={[240, 480]} sizes="11.5rem" format="webp" loading="lazy" draggable="false" />
             </div>
 
             <h3 class="service__name">{s.name}</h3>
@@ -111,7 +97,7 @@ import { SERVICES } from '../data/services';
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
-    padding: 6.5rem clamp(1.5rem, 2.4vw, 2rem) clamp(1.75rem, 3vw, 2.25rem);
+    padding: 7.5rem clamp(1.5rem, 2.4vw, 2rem) clamp(1.75rem, 3vw, 2.25rem);
     border-radius: 1.75rem;
     background: linear-gradient(165deg, #ffffff 0%, #eef4ef 100%);
     box-shadow:
@@ -138,28 +124,15 @@ import { SERVICES } from '../data/services';
     width: 11.5rem;
     height: 11.5rem;
     pointer-events: none;
-    color: var(--taiga);
   }
-  .service__icon canvas {
+  .service__icon :global(img) {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 0.6s;
-  }
-  .service__icon.is-3d canvas {
-    opacity: 1;
-  }
-  .service__fallback {
-    position: absolute;
-    inset: 22%;
-    width: 56%;
-    height: 56%;
-    transition: opacity 0.4s;
-  }
-  .service__icon.is-3d .service__fallback {
-    opacity: 0;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
   .service__name {

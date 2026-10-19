@@ -21,8 +21,8 @@ Landing page / portfólio da agência Taiga, feita com [Astro](https://astro.bui
 - **Logos:** `src/assets/logos/` (verde `#00543F`, branco `#EBEBEB`, preto).
 - **Cores e fontes:** variáveis no topo de `src/styles/global.css`.
 - **Animações:** `src/scripts/motion.ts` (respeita `prefers-reduced-motion`).
-- **3D do hero (logo + folhas):** `src/scripts/hero3d.ts`. **Palavras no fundo do hero:** lista `words` em `src/components/Hero.astro`.
-- **Ícones 3D dos serviços:** `src/scripts/icons3d.ts` (o ícone de cada serviço é o campo `icon` em `src/data/services.ts`).
+- **Logo e ícones 3D:** são imagens pré-renderizadas em `src/assets/3d/` (o site não roda WebGL nem three.js). Para mudar cores, ângulo ou formas, edite `tools/render-3d/scene.js` e rode `npm run render:3d` (precisa do Edge ou Chrome instalado).
+- **Palavras no fundo do hero:** lista `words` em `src/components/Hero.astro`. O ícone de cada serviço é o campo `icon` em `src/data/services.ts`.
 - **Menu:** `src/components/Header.astro`.
 
 ## Skills instaladas (agente)

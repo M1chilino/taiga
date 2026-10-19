@@ -1,5 +1,6 @@
 ---
-import mark from '../assets/logos/icone-verde.svg';
+import { Image } from 'astro:assets';
+import logo3d from '../assets/3d/logo-3d.png';
 import WhatsAppIcon from './WhatsAppIcon.astro';
 import { whatsappUrl } from '../config';
 
@@ -50,8 +51,18 @@ const words = [
     </div>
 
     <div class="hero__stage" data-hero-stage data-hero-intro aria-hidden="true">
-      <img class="hero__fallback" src={mark.src} alt="" width="1000" height="647" />
-      <canvas class="hero__canvas" data-hero-canvas></canvas>
+      <!-- Logo 3D pré-renderizada (imagem): sem WebGL no navegador. Só flutua para cima e para baixo. -->
+      <Image
+        class="hero__logo"
+        src={logo3d}
+        alt=""
+        widths={[700, 1100, 1500]}
+        sizes="(min-width: 900px) 48vw, 100vw"
+        format="webp"
+        loading="eager"
+        fetchpriority="high"
+        draggable="false"
+      />
       <div class="hero__floor"></div>
 
     </div>
@@ -207,35 +218,30 @@ const words = [
     margin-top: 0.4rem;
   }
 
-  /* ------------------------- Palco 3D ------------------------- */
+  /* ------------------------- Palco da logo ------------------------- */
   .hero__stage {
     position: relative;
     z-index: 1;
     height: min(100vw, 27rem);
     margin: -1.5rem calc(var(--gutter) * -1) 0;
   }
-  .hero__fallback {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    width: 58%;
-    height: auto;
-    opacity: 0.9;
-    transition: opacity 0.8s;
-  }
-  .hero__canvas {
+  .hero__stage :global(.hero__logo) {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 0.8s;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    animation: hero-float 6s ease-in-out infinite alternate;
   }
-  :global(.hero__stage.is-3d) .hero__canvas {
-    opacity: 1;
-  }
-  :global(.hero__stage.is-3d) .hero__fallback {
-    opacity: 0;
+  @keyframes hero-float {
+    from {
+      transform: translate3d(0, -14px, 0);
+    }
+    to {
+      transform: translate3d(0, 14px, 0);
+    }
   }
   .hero__floor {
     position: absolute;
@@ -278,9 +284,6 @@ const words = [
       height: clamp(30rem, 74vh, 46rem);
       margin: 0 calc(var(--gutter) * -1) 0 0;
     }
-    .hero__fallback {
-      width: 52%;
-    }
   }
 </style>
 
@@ -296,13 +299,14 @@ const words = [
       visibility: visible;
     }
   }
-  .hero.is-paused :is(.hero__aurora, .hero__beam, .hero__floor, .word) {
+  .hero.is-paused :is(.hero__aurora, .hero__beam, .hero__floor, .hero__logo, .word) {
     animation-play-state: paused;
   }
   @media (prefers-reduced-motion: reduce) {
     .hero__aurora,
     .hero__beam,
     .hero__floor,
+    .hero__logo,
     .word {
       animation: none !important;
     }

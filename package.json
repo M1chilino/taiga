@@ -9,18 +9,21 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "render:3d": "node tools/render-3d/render.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/instrument-sans": "^5.3.0",
     "astro": "^7.4.0",
-    "gsap": "^3.15.0",
-    "three": "^0.186.1"
+    "gsap": "^3.15.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/three": "^0.186.0",
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.64.1",
+    "three": "^0.186.1",
     "typescript": "^6.0.3"
   }
 }
