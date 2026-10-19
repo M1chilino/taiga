@@ -1,0 +1,75 @@
+---
+import mark from '../assets/logos/icone-branco.svg';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { whatsappUrl } from '../config';
+---
+
+<section class="cta" id="contato" data-cta>
+  <div class="pattern pattern--pine-light pattern--soft" aria-hidden="true"></div>
+  <div class="cta__bg" aria-hidden="true">
+    <img src={mark.src} alt="" width="1000" height="647" data-cta-mark />
+  </div>
+  <div class="container cta__inner">
+    <h2 class="cta__title" data-scrub-text>
+      Seu perfil merece parecer do tamanho do seu negócio. Vamos conversar?
+    </h2>
+    <div class="cta__action">
+      <a class="btn btn--light cta__btn" href={whatsappUrl()} target="_blank" rel="noopener" data-magnetic data-cta-button>
+        <WhatsAppIcon /> Chamar no WhatsApp
+      </a>
+      <p class="cta__hint">Sem compromisso. Conte um pouco sobre o seu negócio e a gente mostra o caminho.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    overflow: clip;
+    background:
+      radial-gradient(60% 80% at 100% 100%, rgb(63 162 127 / 0.45), transparent 70%),
+      linear-gradient(135deg, #0d7554 0%, var(--taiga) 45%, var(--taiga-deep) 100%);
+    color: var(--on-dark);
+    padding-block: clamp(5rem, 13vw, 10rem);
+  }
+  .cta__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .cta__bg img {
+    position: absolute;
+    right: -18%;
+    bottom: -22%;
+    width: clamp(22rem, 70vw, 60rem);
+    height: auto;
+    opacity: 0.07;
+    will-change: transform;
+  }
+  .cta__inner {
+    position: relative;
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+  .cta__title {
+    font-size: clamp(2.3rem, 1.2rem + 5.6vw, 5.5rem);
+    max-width: 18ch;
+    line-height: 1.04;
+  }
+  .cta__action {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+  }
+  .cta__btn {
+    min-height: 3.75rem;
+    padding-inline: 2rem;
+    font-size: var(--text-lg);
+  }
+  .cta__hint {
+    max-width: 28rem;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    opacity: 0.8;
+  }
+</style>

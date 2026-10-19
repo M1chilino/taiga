@@ -1,0 +1,90 @@
+---
+import { STATS } from '../config';
+---
+
+<section class="stats" aria-label="Números da Taiga" data-stats>
+  <div class="pattern pattern--pine-light" aria-hidden="true"></div>
+  <div class="stats__sheen" aria-hidden="true"></div>
+  <ul class="container stats__list">
+    {
+      STATS.map((s) => (
+        <li class="stats__item">
+          <span class="stats__value">
+            <span aria-hidden="true">+</span>
+            <span data-count={s.value}>{s.value}</span>
+          </span>
+          <span class="stats__label">{s.label}</span>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .stats {
+    position: relative;
+    overflow: hidden;
+    background: var(--grad-band);
+    color: var(--on-dark);
+    padding-block: clamp(1.75rem, 4vw, 3rem);
+  }
+  .stats__sheen {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.12), transparent);
+    animation: stats-sheen 8s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes stats-sheen {
+    from {
+      transform: translateX(-110%) skewX(-20deg);
+    }
+    to {
+      transform: translateX(300%) skewX(-20deg);
+    }
+  }
+  .stats__list {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .stats__item {
+    display: grid;
+    gap: 0.35rem;
+    justify-items: center;
+    text-align: center;
+  }
+  .stats__item + .stats__item {
+    border-left: 1px solid rgb(235 235 235 / 0.2);
+  }
+  .stats__value {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 1.1rem + 4.4vw, 4.25rem);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stats__label {
+    font-size: var(--text-sm);
+    opacity: 0.8;
+    line-height: 1.25;
+    max-width: 10ch;
+  }
+  @media (min-width: 700px) {
+    .stats__item {
+      grid-auto-flow: column;
+      gap: 1rem;
+      align-items: center;
+    }
+    .stats__label {
+      text-align: left;
+      max-width: none;
+      font-size: var(--text-base);
+    }
+  }
+</style>

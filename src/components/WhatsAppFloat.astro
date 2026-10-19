@@ -1,0 +1,48 @@
+---
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { whatsappUrl } from '../config';
+---
+
+<a class="wa-float" href={whatsappUrl()} target="_blank" rel="noopener" aria-label="Falar no WhatsApp" data-wa-float>
+  <WhatsAppIcon />
+</a>
+
+<style>
+  .wa-float {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--taiga);
+    color: var(--on-dark);
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.25) inset,
+      0 16px 30px -10px rgb(0 58 44 / 0.7);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(1rem) scale(0.9);
+    transition:
+      opacity 0.4s var(--ease-out),
+      transform 0.4s var(--ease-out),
+      visibility 0.4s;
+  }
+  .wa-float :global(svg) {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+  .wa-float.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  @media (min-width: 900px) {
+    .wa-float {
+      display: none;
+    }
+  }
+</style>

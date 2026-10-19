@@ -1,0 +1,157 @@
+---
+import { Image } from 'astro:assets';
+import markLight from '../assets/logos/icone-branco.svg';
+import markGreen from '../assets/logos/icone-verde.svg';
+import type { Work } from '../data/works';
+
+interface Props {
+  work: Work;
+  index: number;
+}
+const { work, index } = Astro.props;
+
+// Variações dos cards de exemplo (tons de verde, posição da marca, tipo de peça)
+const variants = [
+  { bg: 'linear-gradient(160deg,#0a6b50,#00382a)', label: 'Reels', video: true, mark: '78% 24% / 150%' },
+  { bg: 'linear-gradient(200deg,#d7e8da,#a9cdb1)', label: 'Post', video: false, mark: '22% 70% / 120%', dark: true },
+  { bg: 'linear-gradient(140deg,#00543f,#1f7a5c)', label: 'Reels', video: true, mark: '30% 40% / 170%' },
+  { bg: 'linear-gradient(180deg,#f3f7f2,#cfe0d3)', label: 'Carrossel', video: false, mark: '85% 82% / 110%', dark: true },
+  { bg: 'linear-gradient(210deg,#003a2c,#0b6a4f)', label: 'Reels', video: true, mark: '60% 65% / 160%' },
+  { bg: 'linear-gradient(150deg,#8cbf9b,#3e8d6b)', label: 'Identidade', video: false, mark: '20% 25% / 130%' },
+  { bg: 'linear-gradient(170deg,#0f2a22,#00543f)', label: 'Reels', video: true, mark: '75% 40% / 140%' },
+  { bg: 'linear-gradient(190deg,#e6efe8,#b8d6bf)', label: 'Post', video: false, mark: '35% 80% / 115%', dark: true },
+];
+const v = work.kind === 'placeholder' ? variants[work.variant % variants.length] : null;
+---
+
+<li class="card" data-card style={`--ratio:${work.ratio}`}>
+  <div class="card__frame">
+    <div class="card__media" data-card-media>
+      {
+        work.kind === 'image' && (
+          <Image
+            src={work.src}
+            alt={`Design produzido pela Taiga ${index + 1}`}
+            widths={[320, 480, 640]}
+            sizes="(min-width: 900px) 15rem, 40vw"
+            loading={index < 4 ? 'eager' : 'lazy'}
+            draggable="false"
+          />
+        )
+      }
+      {
+        work.kind === 'video' && (
+          <video
+            src={`${work.src}#t=0.1`}
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            aria-label={`Vídeo produzido pela Taiga ${index + 1}`}
+            data-work-video
+          />
+        )
+      }
+      {
+        v && (
+          <div class:list={['ph', { 'ph--dark': v.dark }]} style={`--ph-bg:${v.bg};--ph-mark:${v.mark}`}>
+            <img class:list={['ph__mark', { 'ph__mark--ink': v.dark }]} src={(v.dark ? markGreen : markLight).src} alt="" width="200" height="130" draggable="false" />
+          </div>
+        )
+      }
+    </div>
+    {
+      v && (
+        <span class:list={['ph__label', { 'ph__label--dark': v.dark }]}>
+          {v.video && (
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor" /></svg>
+          )}
+          {v.label}
+        </span>
+      )
+    }
+  </div>
+</li>
+
+<style>
+  .card {
+    flex: none;
+    width: var(--card-w);
+    margin-right: var(--card-gap);
+    will-change: transform;
+  }
+  .card__frame {
+    position: relative;
+    aspect-ratio: var(--ratio);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--paper-2);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.6) inset,
+      0 30px 50px -28px rgb(0 58 44 / 0.55);
+    transform: translateZ(0);
+  }
+  .card__media {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /* margem para o parallax horizontal da mídia dentro do card */
+    scale: 1.2;
+    will-change: transform;
+  }
+  .card__media :global(img),
+  .card__media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .ph {
+    position: absolute;
+    inset: 0;
+    background: var(--ph-bg);
+    color: var(--on-dark);
+  }
+  .ph--dark {
+    color: var(--taiga-deep);
+  }
+  .ph__mark {
+    position: absolute;
+    width: 62%;
+    height: auto;
+    opacity: 0.2;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    scale: 1.2;
+  }
+  .ph__mark--ink {
+    opacity: 0.14;
+  }
+  .ph__label {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font: 600 0.8rem/1 var(--font-body);
+    background: rgb(255 255 255 / 0.16);
+    backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+  }
+  .ph__label--dark {
+    color: var(--taiga-deep);
+    background: rgb(255 255 255 / 0.55);
+    box-shadow: inset 0 0 0 1px rgb(0 84 63 / 0.15);
+  }
+  .ph__label svg {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+</style>

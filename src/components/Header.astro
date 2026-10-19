@@ -1,0 +1,74 @@
+---
+import { Image } from 'astro:assets';
+import icon from '../assets/logos/icone-verde.svg';
+import wordmark from '../assets/logos/texto-verde.svg';
+---
+
+<header class="header" data-header>
+  <div class="header__bar">
+    <a class="header__brand" href="#inicio" aria-label="Taiga - início">
+      <Image class="header__icon" src={icon} alt="" height={26} loading="eager" />
+      <Image class="header__word" src={wordmark} alt="Taiga" height={26} loading="eager" />
+    </a>
+    <nav aria-label="Principal">
+      <a class="header__link" href="#inicio" aria-current="page">Início</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    padding: 0.75rem var(--gutter) 0;
+    pointer-events: none;
+  }
+  .header__bar {
+    max-width: var(--max);
+    margin-inline: auto;
+    height: 3.25rem;
+    padding: 0 0.5rem 0 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 999px;
+    background: rgb(243 247 242 / 0.72);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow:
+      inset 0 0 0 1px rgb(15 42 34 / 0.08),
+      0 10px 30px -18px rgb(15 42 34 / 0.35);
+    pointer-events: auto;
+  }
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 100%;
+  }
+  .header__brand :global(.header__icon) {
+    height: 1.35rem;
+    width: auto;
+  }
+  .header__brand :global(.header__word) {
+    height: 1.5rem;
+    width: auto;
+  }
+  .header__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    background: var(--grad-taiga);
+    color: var(--on-dark);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: transform 0.3s var(--ease-out);
+  }
+  .header__link:hover {
+    transform: scale(1.04);
+  }
+</style>

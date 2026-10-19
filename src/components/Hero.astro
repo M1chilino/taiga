@@ -1,0 +1,364 @@
+---
+import mark from '../assets/logos/icone-verde.svg';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { whatsappUrl } from '../config';
+
+// Palavras que atravessam o fundo bem de leve. dir: 1 = esquerda para direita, -1 = o contrário
+const words = [
+  { t: 'valor', y: 12, size: 1, dur: 58, delay: -10, dir: 1, fill: false },
+  { t: 'crescimento', y: 24, size: 1.5, dur: 74, delay: -48, dir: -1, fill: true },
+  { t: 'novos clientes', y: 41, size: 1.25, dur: 66, delay: -22, dir: 1, fill: false },
+  { t: 'sucesso', y: 57, size: 1.7, dur: 80, delay: -60, dir: -1, fill: false },
+  { t: 'resultados', y: 72, size: 1.1, dur: 62, delay: -34, dir: 1, fill: true },
+  { t: 'autoridade', y: 86, size: 1.4, dur: 70, delay: -5, dir: -1, fill: false },
+  { t: 'vendas', y: 33, size: 1, dur: 54, delay: -40, dir: -1, fill: true, desk: true },
+  { t: 'confiança', y: 66, size: 1.3, dur: 84, delay: -70, dir: 1, fill: false, desk: true },
+];
+---
+
+<section class="hero" id="inicio" data-hero>
+  <!-- Fundo: degradê em malha, aurora, feixes de luz e spot que segue o mouse -->
+  <div class="hero__bg" aria-hidden="true">
+    <div class="hero__mesh"></div>
+    <div class="hero__aurora"></div>
+    <div class="hero__beam hero__beam--a"></div>
+    <div class="hero__beam hero__beam--b"></div>
+    <div class="hero__words">
+      {
+        words.map((w) => (
+          <span
+            class:list={['word', { 'word--fill': w.fill, 'word--desk': w.desk }]}
+            style={`--y:${w.y}%;--size:${w.size};--dur:${w.dur}s;--delay:${w.delay}s;--dir:${w.dir}`}
+          >
+            {w.t}
+          </span>
+        ))
+      }
+    </div>
+    <div class="hero__glow hero__glow--a" data-glow></div>
+    <div class="hero__glow hero__glow--b" data-glow></div>
+    <div class="pattern pattern--dots-dark pattern--fade-left hero__dots"></div>
+    <div class="hero__spot" data-spot></div>
+  </div>
+
+  <div class="container hero__grid">
+    <div class="hero__content" data-hero-content>
+      <h1 class="hero__title" data-hero-title>Seu Instagram com cara de marca grande.</h1>
+      <p class="hero__lead" data-hero-intro>
+        A Taiga é uma agência de marketing que cria o design e os vídeos do seu perfil, da análise à postagem.
+      </p>
+      <div class="hero__actions" data-hero-intro>
+        <a class="btn" href={whatsappUrl()} target="_blank" rel="noopener" data-magnetic>
+          <WhatsAppIcon /> Falar no WhatsApp
+        </a>
+        <a class="btn btn--ghost" href="#servicos">Ver serviços</a>
+      </div>
+    </div>
+
+    <div class="hero__stage" data-hero-stage data-hero-intro aria-hidden="true">
+      <img class="hero__fallback" src={mark.src} alt="" width="1000" height="647" />
+      <canvas class="hero__canvas" data-hero-canvas></canvas>
+      <div class="hero__floor"></div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: clip;
+    padding-top: calc(var(--header-h) + 1.5rem);
+    padding-bottom: clamp(1rem, 4vw, 3rem);
+    background: var(--paper);
+  }
+
+  /* ------------------------- Fundo ------------------------- */
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hero__mesh {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 55% at 78% 40%, rgb(169 205 177 / 0.7), transparent 72%),
+      radial-gradient(45% 45% at 8% 100%, rgb(207 224 211 / 0.95), transparent 72%),
+      radial-gradient(40% 40% at 45% 0%, #ffffff, transparent 70%),
+      linear-gradient(180deg, #f7faf6 0%, #e6efe8 100%);
+  }
+  .hero__aurora {
+    position: absolute;
+    width: 46rem;
+    height: 46rem;
+    right: -12rem;
+    top: 50%;
+    margin-top: -23rem;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #cfe0d3, #8cbf9b, #f3f7f2, #5fa583, #cfe0d3);
+    filter: blur(70px);
+    opacity: 0.7;
+    animation: hero-spin 46s linear infinite;
+    will-change: transform;
+  }
+  .hero__beam {
+    position: absolute;
+    top: -15%;
+    width: 11rem;
+    height: 130%;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0) 85%);
+    filter: blur(16px);
+    transform-origin: top center;
+    animation: hero-sway 9s ease-in-out infinite alternate;
+  }
+  .hero__beam--a {
+    right: 34%;
+    rotate: 20deg;
+    opacity: 0.55;
+  }
+  .hero__beam--b {
+    right: 14%;
+    width: 7rem;
+    rotate: 28deg;
+    opacity: 0.4;
+    animation-duration: 12s;
+    animation-delay: -4s;
+  }
+  .hero__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    will-change: transform;
+  }
+  .hero__glow--a {
+    width: 26rem;
+    height: 26rem;
+    right: 6%;
+    bottom: -8rem;
+    background: rgb(0 84 63 / 0.18);
+  }
+  .hero__glow--b {
+    width: 20rem;
+    height: 20rem;
+    left: -6rem;
+    top: 18%;
+    background: rgb(169 205 177 / 0.6);
+  }
+  .hero__dots {
+    opacity: 0.55;
+  }
+
+  /* Palavras que passam pelo fundo */
+  .hero__words {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .word {
+    position: absolute;
+    left: 0;
+    top: var(--y);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: calc(var(--size) * clamp(1.6rem, 1rem + 2.6vw, 3.6rem));
+    letter-spacing: -0.03em;
+    line-height: 1;
+    white-space: nowrap;
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(0 84 63 / 0.2);
+    opacity: 0.9;
+    animation: word-drift var(--dur) linear infinite;
+    animation-delay: var(--delay);
+    will-change: transform;
+  }
+  .word[style*='--dir:-1'] {
+    animation-direction: reverse;
+  }
+  .word--fill {
+    color: rgb(0 84 63 / 0.07);
+    -webkit-text-stroke: 0;
+  }
+  .word--desk {
+    display: none;
+  }
+  @keyframes word-drift {
+    from {
+      transform: translateX(-45vw);
+    }
+    to {
+      transform: translateX(115vw);
+    }
+  }
+  .hero__spot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40rem;
+    height: 40rem;
+    margin: -20rem 0 0 -20rem;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(255 255 255 / 0.65), transparent);
+    will-change: transform;
+  }
+
+  @keyframes hero-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes hero-sway {
+    from {
+      transform: rotate(-5deg);
+      opacity: 0.3;
+    }
+    to {
+      transform: rotate(5deg);
+      opacity: 0.75;
+    }
+  }
+
+  /* ------------------------- Conteúdo ------------------------- */
+  .hero__grid {
+    position: relative;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 1.4rem;
+    justify-items: start;
+    padding-top: clamp(1rem, 4vh, 3rem);
+  }
+  .hero__title {
+    font-size: clamp(2.75rem, 1.1rem + 6.6vw, 5.5rem);
+    max-width: 11ch;
+    color: var(--taiga-deep);
+  }
+  :global(.hero__title.is-gradient) {
+    background: linear-gradient(100deg, #003a2c 10%, #0d7a5a 60%, #3fa27f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .hero__lead {
+    max-width: 30rem;
+    font-size: var(--text-lg);
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ------------------------- Palco 3D ------------------------- */
+  .hero__stage {
+    position: relative;
+    z-index: 1;
+    height: min(100vw, 27rem);
+    margin: -1.5rem calc(var(--gutter) * -1) 0;
+  }
+  .hero__fallback {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 58%;
+    height: auto;
+    opacity: 0.9;
+    transition: opacity 0.8s;
+  }
+  .hero__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s;
+  }
+  :global(.hero__stage.is-3d) .hero__canvas {
+    opacity: 1;
+  }
+  :global(.hero__stage.is-3d) .hero__fallback {
+    opacity: 0;
+  }
+  .hero__floor {
+    position: absolute;
+    left: 50%;
+    bottom: 9%;
+    width: 46%;
+    height: 7%;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(0 58 44 / 0.35), transparent);
+    filter: blur(8px);
+    animation: hero-floor 5s ease-in-out infinite;
+  }
+  @keyframes hero-floor {
+    50% {
+      transform: scale(0.82);
+      opacity: 0.6;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .word--desk {
+      display: block;
+    }
+    .hero {
+      min-height: min(100svh, 62rem);
+      display: grid;
+      align-items: center;
+      padding-top: calc(var(--header-h) + 2rem);
+      padding-bottom: 3rem;
+    }
+    .hero__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero__content {
+      padding-top: 0;
+    }
+    .hero__title {
+      max-width: 9.5em;
+    }
+    .hero__stage {
+      height: clamp(30rem, 74vh, 46rem);
+      margin: 0 calc(var(--gutter) * -1) 0 0;
+    }
+    .hero__fallback {
+      width: 52%;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Estado inicial da animação de entrada (só quando há JS e movimento permitido) */
+  html.js:not(.reduced) [data-hero-intro],
+  html.js:not(.reduced) [data-hero-title] {
+    visibility: hidden;
+    animation: taiga-reveal-fallback 0.01s 4s forwards;
+  }
+  @keyframes taiga-reveal-fallback {
+    to {
+      visibility: visible;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__aurora,
+    .hero__beam,
+    .hero__floor,
+    .word {
+      animation: none !important;
+    }
+    .word {
+      transform: translateX(8vw);
+    }
+  }
+</style>

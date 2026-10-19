@@ -1,0 +1,124 @@
+---
+import { Image } from 'astro:assets';
+import mark from '../assets/logos/icone-verde.svg';
+import { feedbacks } from '../data/feedbacks';
+---
+
+<section class="feedback" id="feedback" data-feedback>
+  <div class="pattern pattern--pine-dark pattern--fade pattern--soft" aria-hidden="true"></div>
+  <div class="container feedback__inner">
+    <h2 class="feedback__title" data-split-title>Quem trabalha com a Taiga, recomenda.</h2>
+
+    <ul class="feedback__grid" data-feedback-grid>
+      {
+        feedbacks.map((img, i) => (
+          <li class="fb" data-fb data-speed={i === 1 ? 0.7 : 0.35}>
+            <div class="fb__tilt" data-tilt>
+            {img ? (
+              <Image
+                src={img}
+                alt={`Feedback de cliente ${i + 1}`}
+                widths={[400, 640, 900]}
+                sizes="(min-width: 900px) 24rem, 78vw"
+                class="fb__img"
+              />
+            ) : (
+              <div class="fb__empty">
+                <img src={mark.src} alt="" width="80" height="52" />
+                <span>Feedback de cliente</span>
+              </div>
+            )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .feedback {
+    position: relative;
+    padding-block: clamp(4rem, 9vw, 7rem);
+    background:
+      radial-gradient(55% 60% at 0% 100%, rgb(169 205 177 / 0.55), transparent 70%),
+      linear-gradient(180deg, #e1ece4 0%, var(--paper-2) 100%);
+    overflow: clip;
+  }
+  .feedback__inner {
+    position: relative;
+  }
+  .feedback__title {
+    font-size: var(--text-h2);
+    color: var(--taiga-deep);
+    max-width: 16ch;
+  }
+  .feedback__grid {
+    display: flex;
+    gap: 1rem;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+    /* mobile: carrossel com snap */
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 1rem var(--gutter) 2rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .feedback__grid::-webkit-scrollbar {
+    display: none;
+  }
+  .fb {
+    flex: 0 0 78%;
+    scroll-snap-align: center;
+    perspective: 900px;
+  }
+  .fb__tilt {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px rgb(15 42 34 / 0.06),
+      0 28px 50px -28px rgb(0 58 44 / 0.45);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .fb :global(.fb__img) {
+    width: 100%;
+    height: auto;
+  }
+  .fb__empty {
+    aspect-ratio: 9 / 14;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    border: 1.5px dashed rgb(0 84 63 / 0.35);
+    border-radius: var(--radius);
+    color: var(--taiga);
+    font-weight: 600;
+    font-size: var(--text-sm);
+  }
+  .fb__empty img {
+    width: 3.5rem;
+    height: auto;
+    opacity: 0.5;
+  }
+
+  @media (min-width: 900px) {
+    .feedback__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: start;
+      gap: clamp(1.25rem, 3vw, 2.5rem);
+      margin-inline: 0;
+      padding: 1rem 0 0;
+      overflow: visible;
+    }
+    .fb {
+      flex: initial;
+    }
+    .fb:nth-child(2) {
+      margin-top: 4rem;
+    }
+  }
+</style>

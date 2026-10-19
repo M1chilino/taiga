@@ -1,0 +1,79 @@
+---
+import WorkCard from './WorkCard.astro';
+import { works } from '../data/works';
+---
+
+<section class="showcase" id="trabalhos" data-showcase>
+  <div class="pattern pattern--dots-dark pattern--fade showcase__dots" aria-hidden="true"></div>
+  <div class="container showcase__head">
+    <h2 class="showcase__title" data-split-title>Alguns dos nossos trabalhos</h2>
+    <p class="showcase__lead">Designs e vídeos produzidos para os perfis dos nossos clientes.</p>
+  </div>
+
+  <div class="reel" data-reel role="region" aria-label="Trabalhos produzidos pela Taiga">
+    <ul class="reel__track" data-reel-track>
+      {works.map((work, i) => <WorkCard work={work} index={i} />)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .showcase {
+    --card-w: clamp(9.5rem, 40vw, 15rem);
+    --card-gap: clamp(0.75rem, 2vw, 1.5rem);
+    position: relative;
+    overflow: clip;
+    padding-block: clamp(3.5rem, 8vw, 6.5rem) clamp(2.5rem, 6vw, 5rem);
+    background:
+      radial-gradient(60% 60% at 100% 0%, rgb(169 205 177 / 0.45), transparent 70%),
+      linear-gradient(180deg, var(--paper) 0%, #e9f1ec 100%);
+  }
+  .showcase__dots {
+    opacity: 0.5;
+  }
+  .showcase__head {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+  }
+  .showcase__title {
+    font-size: var(--text-h2);
+    color: var(--taiga-deep);
+    max-width: 14ch;
+  }
+  .showcase__lead {
+    max-width: 28rem;
+    color: var(--ink-soft);
+    font-size: var(--text-lg);
+    line-height: 1.5;
+  }
+
+  /* Carrossel */
+  .reel {
+    position: relative;
+    margin-top: clamp(1.5rem, 4vw, 3rem);
+    padding-block: 2.5rem;
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .reel:active {
+    cursor: grabbing;
+  }
+  .reel__track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    padding-left: var(--gutter);
+    will-change: transform;
+  }
+
+  /* Sem JS ou com movimento reduzido: vira uma faixa rolável */
+  :global(html:not(.js)) .reel,
+  :global(html.reduced) .reel {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    cursor: auto;
+  }
+</style>

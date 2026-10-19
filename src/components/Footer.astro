@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import wordmark from '../assets/logos/texto-branco.svg';
+import { SITE } from '../config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <Image src={wordmark} alt="Taiga" height={22} class="footer__logo" />
+    <p>{SITE.city}</p>
+    <p>© {year} Taiga. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--taiga-deep);
+    color: var(--on-dark);
+    padding-block: 2rem;
+    font-size: var(--text-sm);
+  }
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+  }
+  .footer__inner p {
+    opacity: 0.75;
+  }
+  .footer :global(.footer__logo) {
+    height: 1.4rem;
+    width: auto;
+    margin-right: auto;
+  }
+</style>

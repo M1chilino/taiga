@@ -1,0 +1,164 @@
+---
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { whatsappUrl } from '../config';
+
+const pains = [
+  {
+    title: 'Um perfil que não diz o que você faz',
+    text: 'Feed sem padrão, bio confusa, posts que parecem de marcas diferentes. O cliente chega, não entende o que você vende e sai em segundos.',
+    icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9c0-4.400 3.600-7 8-7s8 2.600 8 7',
+  },
+  {
+    title: 'Falta de tempo para postar',
+    text: 'Entre atender, resolver e tocar o negócio, o Instagram sempre fica para amanhã. Os dias viram semanas sem postar, e o perfil perde força.',
+    icon: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-14v5l3 2',
+  },
+  {
+    title: 'Postar sem saber se funciona',
+    text: 'Sem estratégia nem métricas, é tentativa e erro. Você gasta energia em conteúdo que ninguém vê e não sabe o que ajustar.',
+    icon: 'm3 7 6 6 4-4 8 8m0 0v-6m0 6h-6',
+  },
+];
+---
+
+<section class="problem" id="problema" data-problem>
+  <div class="pattern pattern--pine-light pattern--fade" aria-hidden="true"></div>
+  <div class="problem__glow" aria-hidden="true"></div>
+  <div class="container problem__inner">
+    <h2 class="problem__title" data-scrub-text>
+      Você sabe que precisa aparecer no Instagram. Só não tem tempo, nem por onde começar.
+    </h2>
+    <p class="problem__lead">
+      E enquanto o seu perfil fica parado, quem aparece mais leva o cliente que podia ser seu.
+    </p>
+
+    <ul class="problem__pains">
+      {
+        pains.map((p) => (
+          <li class="pain" data-pain>
+            <svg class="pain__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d={p.icon} />
+            </svg>
+            <h3 class="pain__title">{p.title}</h3>
+            <p class="pain__text">{p.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="problem__bridge" data-pain>
+      <p>Isso tem solução, e não exige que você vire especialista em marketing.</p>
+      <a
+        class="btn btn--light"
+        href={whatsappUrl('Olá! Quero ajuda para resolver o meu perfil no Instagram.')}
+        target="_blank"
+        rel="noopener"
+        data-magnetic
+      >
+        <WhatsAppIcon /> Quero resolver o meu perfil
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .problem {
+    position: relative;
+    overflow: clip;
+    background:
+      radial-gradient(60% 70% at 90% 0%, rgb(13 122 90 / 0.5), transparent 70%),
+      linear-gradient(160deg, #004634 0%, var(--taiga-deep) 55%, #00271e 100%);
+    color: var(--on-dark);
+    padding-block: clamp(4.5rem, 11vw, 9rem);
+  }
+  .problem__glow {
+    position: absolute;
+    width: 30rem;
+    height: 30rem;
+    left: -10rem;
+    bottom: -12rem;
+    border-radius: 50%;
+    background: rgb(63 162 127 / 0.28);
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .problem__inner {
+    position: relative;
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .problem__title {
+    font-size: clamp(2.2rem, 1.1rem + 5.2vw, 5rem);
+    max-width: 19ch;
+    line-height: 1.04;
+  }
+  .problem__lead {
+    max-width: 34rem;
+    font-size: var(--text-lg);
+    line-height: 1.5;
+    color: var(--lichen);
+  }
+
+  .problem__pains {
+    display: grid;
+    margin-top: clamp(1.5rem, 4vw, 3rem);
+    border-top: 1px solid rgb(235 235 235 / 0.2);
+  }
+  .pain {
+    display: grid;
+    gap: 0.85rem;
+    padding-block: clamp(1.75rem, 4vw, 2.5rem);
+    border-bottom: 1px solid rgb(235 235 235 / 0.2);
+  }
+  .pain__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    color: var(--lichen);
+  }
+  .pain__title {
+    font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+    line-height: 1.1;
+  }
+  .pain__text {
+    max-width: 30rem;
+    line-height: 1.55;
+    opacity: 0.78;
+  }
+
+  .problem__bridge {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+    margin-top: clamp(1rem, 3vw, 2rem);
+  }
+  .problem__bridge p {
+    max-width: 30rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.1rem);
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+  }
+
+  @media (min-width: 900px) {
+    .problem__pains {
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid rgb(235 235 235 / 0.2);
+    }
+    .pain {
+      padding: 2.5rem 2rem 2.75rem;
+      border-bottom: 0;
+    }
+    .pain:first-child {
+      padding-left: 0;
+    }
+    .pain + .pain {
+      border-left: 1px solid rgb(235 235 235 / 0.2);
+    }
+    .problem__bridge {
+      grid-auto-flow: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+</style>
